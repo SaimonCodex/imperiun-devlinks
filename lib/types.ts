@@ -28,7 +28,6 @@ export interface DevLink {
 export interface Category {
   id: LinkCategory;
   label: string;
-  emoji: string;
   color: string;
 }
 

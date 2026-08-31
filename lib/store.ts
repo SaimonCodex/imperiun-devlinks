@@ -6,6 +6,9 @@ import { DevLink, LinkCategory, ViewMode } from './types';
 import { DEFAULT_LINKS } from './defaultLinks';
 import { generateId, getFaviconUrl } from './utils';
 
+type PreviewMode = 'single' | 'split';
+type Theme = 'dark' | 'light';
+
 interface DevLinksStore {
   links: DevLink[];
   activeCategory: string;
@@ -15,6 +18,15 @@ interface DevLinksStore {
   editingLink: DevLink | null;
   sidebarOpen: boolean;
   initialized: boolean;
+  theme: Theme;
+
+  // Preview panel state
+  previewLink: DevLink | null;
+  previewMode: PreviewMode;
+  splitLinks: [DevLink | null, DevLink | null];
+
+  // Detail modal state
+  detailLink: DevLink | null;
 
   // Actions
   setActiveCategory: (category: string) => void;
@@ -23,6 +35,17 @@ interface DevLinksStore {
   openModal: (link?: DevLink) => void;
   closeModal: () => void;
   toggleSidebar: () => void;
+  toggleTheme: () => void;
+
+  // Preview actions
+  openPreview: (link: DevLink) => void;
+  closePreview: () => void;
+  setSplitMode: (enabled: boolean) => void;
+  openInSplit: (link: DevLink, slot: 0 | 1) => void;
+
+  // Detail actions
+  openDetail: (link: DevLink) => void;
+  closeDetail: () => void;
 
   // Link CRUD
   addLink: (data: Omit<DevLink, 'id' | 'createdAt' | 'visitCount'>) => void;
@@ -44,6 +67,12 @@ export const useDevLinksStore = create<DevLinksStore>()(
       editingLink: null,
       sidebarOpen: true,
       initialized: true,
+      theme: 'dark',
+
+      previewLink: null,
+      previewMode: 'single',
+      splitLinks: [null, null],
+      detailLink: null,
 
       setActiveCategory: (category) => set({ activeCategory: category, searchQuery: '' }),
       setSearchQuery: (query) => set({ searchQuery: query }),
@@ -52,6 +81,36 @@ export const useDevLinksStore = create<DevLinksStore>()(
       openModal: (link) => set({ isModalOpen: true, editingLink: link ?? null }),
       closeModal: () => set({ isModalOpen: false, editingLink: null }),
       toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
+      toggleTheme: () => {
+        set((s) => {
+          const nextTheme = s.theme === 'dark' ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', nextTheme);
+          return { theme: nextTheme };
+        });
+      },
+
+      openPreview: (link) => {
+        get().visitLink(link.id);
+        set({ previewLink: link, previewMode: 'single', splitLinks: [link, null] });
+      },
+      closePreview: () => set({ previewLink: null, previewMode: 'single', splitLinks: [null, null] }),
+      setSplitMode: (enabled) => set((s) => ({
+        previewMode: enabled ? 'split' : 'single',
+        splitLinks: enabled
+          ? [s.previewLink, null]
+          : [s.splitLinks[0], null],
+      })),
+      openInSplit: (link, slot) => {
+        get().visitLink(link.id);
+        set((s) => {
+          const next: [DevLink | null, DevLink | null] = [...s.splitLinks] as [DevLink | null, DevLink | null];
+          next[slot] = link;
+          return { splitLinks: next, previewLink: next[0] ?? link, previewMode: 'split' };
+        });
+      },
+
+      openDetail: (link) => set({ detailLink: link }),
+      closeDetail: () => set({ detailLink: null }),
 
       addLink: (data) => {
         const newLink: DevLink = {
@@ -97,6 +156,12 @@ export const useDevLinksStore = create<DevLinksStore>()(
     {
       name: 'devlinks-storage',
       version: 1,
+      partialize: (s) => ({
+        links: s.links,
+        sidebarOpen: s.sidebarOpen,
+        viewMode: s.viewMode,
+        theme: s.theme,
+      }),
     }
   )
 );

@@ -1,0 +1,45 @@
+name: "Compilar Tauri App"
+
+# Este workflow se ejecuta cuando subes código a la rama 'main'
+# o cuando lo lanzas manualmente desde la pestaña "Actions" de GitHub.
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+      # 1. Clona tu código en la computadora de la nube
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Prepara Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 3. Instala los paquetes de Next.js
+      - name: Install dependencies
+        run: npm install
+
+      # 4. Prepara el entorno de Rust (la nube SÍ tiene todo instalado gratis)
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      # 5. Usa la acción oficial de Tauri para compilar
+      - name: Build Tauri App
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Si tienes comandos pre-compilación configurados, Tauri los ejecutará
+          # y luego empaquetará tu app en un instalador (.msi / .exe)
+          includeDebug: false
+          includeRelease: true

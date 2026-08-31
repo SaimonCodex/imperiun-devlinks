@@ -1,95 +1,155 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { Plus, LayoutGrid, List, Search } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, Plus, LayoutGrid, List, Sun, Moon } from 'lucide-react';
 import { useDevLinksStore } from '@/lib/store';
 
 export default function GlassNavbar() {
-  const { searchQuery, setSearchQuery, viewMode, setViewMode, openModal } = useDevLinksStore();
+  const { searchQuery, setSearchQuery, viewMode, setViewMode, openModal, theme, toggleTheme } = useDevLinksStore();
 
   return (
-    <header className="sticky top-0 z-40 px-4 pt-4 pb-2">
-      {/* Ambient light behind navbar */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[80px] rounded-full bg-white/[0.06] blur-[70px] pointer-events-none" />
-
-      <div className="max-w-[1400px] mx-auto flex items-center gap-3">
-        {/* Logo pill */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          className="glass-navbar flex items-center gap-2 px-4 rounded-full h-10 shrink-0"
+    <header
+      style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
+        borderBottom: '1px solid var(--c-border-md)',
+        background: 'var(--c-nav-bg)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+      }}
+    >
+      <div
+        style={{
+          maxWidth: 1440,
+          margin: '0 auto',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          padding: '0 24px',
+          height: 52,
+        }}
+      >
+        {/* Wordmark */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            marginRight: 8,
+            flexShrink: 0,
+          }}
         >
-          <div className="w-6 h-6 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-xs">
-            ⚡
+          <div
+            style={{
+              width: 22,
+              height: 22,
+              borderRadius: 6,
+              background: 'var(--c-text-1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M1 6h10M6 1l5 5-5 5" stroke="var(--c-bg)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
-          <span className="text-white font-semibold text-sm tracking-tight whitespace-nowrap">
+          <span
+            style={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: 'var(--c-text-1)',
+              letterSpacing: '-0.03em',
+            }}
+          >
             DevLinks
           </span>
-        </motion.div>
+        </div>
 
-        {/* Search bar — center */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
-          className="flex-1 max-w-[480px] relative"
-        >
+        {/* Separator */}
+        <div style={{ width: 1, height: 20, background: 'var(--c-border)', flexShrink: 0 }} />
+
+        {/* Search */}
+        <div style={{ flex: 1, maxWidth: 400, position: 'relative' }}>
           <Search
-            size={14}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none"
+            size={13}
+            style={{
+              position: 'absolute',
+              left: 12,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: 'var(--c-text-3)',
+              pointerEvents: 'none',
+            }}
           />
           <input
+            className="input"
+            style={{
+              paddingLeft: 34,
+              height: 34,
+              borderRadius: 8,
+              fontSize: 12,
+            }}
             type="text"
-            placeholder="Buscar herramientas, docs, URLs..."
+            placeholder="Buscar recursos..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="input-glass h-10 pl-9 pr-4 rounded-full text-[13px]"
+            onChange={e => setSearchQuery(e.target.value)}
           />
-        </motion.div>
+        </div>
 
         {/* Right controls */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.10, ease: [0.22, 1, 0.36, 1] }}
-          className="flex items-center gap-2 ml-auto shrink-0"
-        >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 'auto', flexShrink: 0 }}>
+          {/* Theme toggle */}
+          <button
+            onClick={toggleTheme}
+            className="btn btn-ghost"
+            style={{ width: 32, height: 32, padding: 0, borderRadius: 8, border: '1px solid var(--c-border)' }}
+            title={theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+          >
+            {theme === 'dark' ? <Sun size={13} /> : <Moon size={13} />}
+          </button>
+
           {/* View toggle */}
-          <div className="glass-subtle flex items-center rounded-full p-[3px] gap-[2px]">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`w-8 h-7 rounded-full flex items-center justify-center transition-all duration-150 ${
-                viewMode === 'grid'
-                  ? 'bg-white/15 text-white'
-                  : 'text-white/35 hover:text-white/60'
-              }`}
-              title="Vista grilla"
-            >
-              <LayoutGrid size={13} />
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`w-8 h-7 rounded-full flex items-center justify-center transition-all duration-150 ${
-                viewMode === 'list'
-                  ? 'bg-white/15 text-white'
-                  : 'text-white/35 hover:text-white/60'
-              }`}
-              title="Vista lista"
-            >
-              <List size={13} />
-            </button>
+          <div
+            style={{
+              display: 'flex',
+              background: 'var(--c-input-bg)',
+              border: '1px solid var(--c-border)',
+              borderRadius: 8,
+              padding: 2,
+              gap: 1,
+            }}
+          >
+            {([['grid', LayoutGrid], ['list', List]] as const).map(([mode, Icon]) => (
+              <button
+                key={mode}
+                onClick={() => setViewMode(mode as 'grid' | 'list')}
+                className="btn btn-ghost"
+                style={{
+                  width: 28,
+                  height: 26,
+                  borderRadius: 6,
+                  padding: 0,
+                  background: viewMode === mode ? 'var(--c-glass-hi)' : 'transparent',
+                  color: viewMode === mode ? 'var(--c-text-1)' : 'var(--c-text-3)',
+                }}
+              >
+                <Icon size={13} />
+              </button>
+            ))}
           </div>
 
-          {/* Add link button */}
+          {/* Add button */}
           <button
             onClick={() => openModal()}
-            className="btn-primary h-10 px-5 text-[11px] font-semibold"
+            className="btn btn-white"
+            style={{ height: 34, paddingLeft: 14, paddingRight: 14, fontSize: 12, fontWeight: 500 }}
           >
-            <Plus size={14} />
+            <Plus size={13} />
             Agregar
           </button>
-        </motion.div>
+        </div>
       </div>
     </header>
   );
