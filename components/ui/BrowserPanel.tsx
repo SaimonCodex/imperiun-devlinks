@@ -9,6 +9,7 @@ import {
 import { DevLink } from '@/lib/types';
 import { useDevLinksStore } from '@/lib/store';
 import { getDomain } from '@/lib/utils';
+import { openExternal } from '@/lib/openExternal';
 
 /* ─── Single iframe pane ─── */
 function IframePane({ link, slot }: { link: DevLink | null; slot: 0 | 1 }) {
@@ -66,8 +67,11 @@ function IframePane({ link, slot }: { link: DevLink | null; slot: 0 | 1 }) {
         <button onClick={reload} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, color: 'rgba(255,255,255,0.2)', display: 'flex', borderRadius: 4 }}>
           <RefreshCw size={11} />
         </button>
-        <a href={link.url} target="_blank" rel="noopener noreferrer"
-          style={{ color: 'rgba(255,255,255,0.2)', display: 'flex', padding: 3, borderRadius: 4, textDecoration: 'none' }}>
+        <a
+          href={link.url}
+          onClick={(e) => { e.preventDefault(); openExternal(link.url); }}
+          style={{ color: 'rgba(255,255,255,0.2)', display: 'flex', padding: 3, borderRadius: 4, textDecoration: 'none', cursor: 'pointer' }}
+        >
           <ExternalLink size={11} />
         </a>
       </div>
@@ -115,8 +119,7 @@ function IframePane({ link, slot }: { link: DevLink | null; slot: 0 | 1 }) {
               </p>
               <a
                 href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
+                onClick={(e) => { e.preventDefault(); openExternal(link.url); }}
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 7,
                   padding: '9px 18px',
@@ -127,6 +130,7 @@ function IframePane({ link, slot }: { link: DevLink | null; slot: 0 | 1 }) {
                   fontSize: 12, fontWeight: 600,
                   letterSpacing: '-0.01em',
                   transition: 'opacity 120ms ease',
+                  cursor: 'pointer',
                 }}
                 onMouseEnter={e => (e.currentTarget.style.opacity = '0.88')}
                 onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
@@ -287,7 +291,10 @@ export default function BrowserPanel() {
                   <Columns2 size={11} /> Split
                 </button>
 
-                <a href={previewLink?.url} target="_blank" rel="noopener noreferrer" style={{
+                <a
+                  href={previewLink?.url}
+                  onClick={(e) => { e.preventDefault(); if (previewLink?.url) openExternal(previewLink.url); }}
+                  style={{
                   display: 'flex', alignItems: 'center', gap: 5,
                   padding: '4px 10px', borderRadius: 7,
                   background: 'var(--c-btn-dark-bg)',
@@ -295,7 +302,9 @@ export default function BrowserPanel() {
                   fontSize: 10, fontWeight: 500,
                   color: 'var(--c-text-3)',
                   textDecoration: 'none', transition: 'all 140ms ease',
-                }}>
+                  cursor: 'pointer',
+                }}
+                >
                   <ExternalLink size={11} /> Nueva pestaña
                 </a>
 

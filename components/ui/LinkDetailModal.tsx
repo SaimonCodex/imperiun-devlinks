@@ -10,6 +10,7 @@ import {
 import { useDevLinksStore } from '@/lib/store';
 import { getCategoryById } from '@/lib/defaultLinks';
 import { getDomain } from '@/lib/utils';
+import { openExternal } from '@/lib/openExternal';
 
 /* ─── Microlink media fetch ─── */
 interface MediaItem {
@@ -183,7 +184,8 @@ function GalleryPanel({ url }: { url: string }) {
 
         {/* Open externally (bottom-right) */}
         <a
-          href={url} target="_blank" rel="noopener noreferrer"
+          href={url}
+          onClick={(e) => { e.preventDefault(); openExternal(url); }}
           style={{
             position: 'absolute', bottom: hasMany ? 38 : 14, right: 14,
             display: 'flex', alignItems: 'center', gap: 5,
@@ -192,6 +194,7 @@ function GalleryPanel({ url }: { url: string }) {
             backdropFilter: 'blur(16px)',
             fontSize: 11, fontWeight: 500, color: 'var(--c-text-1)',
             textDecoration: 'none', zIndex: 3, transition: 'all 120ms ease',
+            cursor: 'pointer',
           }}
           onMouseEnter={e => { e.currentTarget.style.background = 'var(--c-text-1)'; e.currentTarget.style.color = 'var(--c-bg)'; }}
           onMouseLeave={e => { e.currentTarget.style.background = 'var(--c-glass-hi)'; e.currentTarget.style.color = 'var(--c-text-1)'; }}
@@ -225,8 +228,7 @@ function GalleryPanel({ url }: { url: string }) {
       {/* Open externally badge */}
       <a
         href={url}
-        target="_blank"
-        rel="noopener noreferrer"
+        onClick={(e) => { e.preventDefault(); openExternal(url); }}
         style={{
           position: 'absolute', bottom: media.items.length > 1 ? 40 : 14, right: 14,
           display: 'flex', alignItems: 'center', gap: 5,
@@ -236,6 +238,7 @@ function GalleryPanel({ url }: { url: string }) {
           fontSize: 11, fontWeight: 500, color: 'var(--c-text-1)',
           textDecoration: 'none', zIndex: 3,
           transition: 'all 120ms ease',
+          cursor: 'pointer',
         }}
         onMouseEnter={e => (e.currentTarget.style.background = 'var(--c-text-1)', e.currentTarget.style.color = 'var(--c-bg)')}
         onMouseLeave={e => (e.currentTarget.style.background = 'var(--c-glass-hi)', e.currentTarget.style.color = 'var(--c-text-1)')}
@@ -318,10 +321,12 @@ function InfoPanel({ link }: { link: import('@/lib/types').DevLink }) {
               {link.title}
             </h2>
             <a
-              href={link.url} target="_blank" rel="noopener noreferrer"
+              onClick={(e) => { e.preventDefault(); openExternal(link.url); }}
+              href={link.url}
               style={{
                 fontSize: 11, color: 'var(--c-text-3)', textDecoration: 'none',
                 letterSpacing: '-0.01em', display: 'flex', alignItems: 'center', gap: 4,
+                cursor: 'pointer',
               }}
               onMouseEnter={e => e.currentTarget.style.color = 'var(--c-text-2)'}
               onMouseLeave={e => e.currentTarget.style.color = 'var(--c-text-3)'}

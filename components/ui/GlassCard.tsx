@@ -7,6 +7,7 @@ import { DevLink } from '@/lib/types';
 import { useDevLinksStore } from '@/lib/store';
 import { getCategoryById } from '@/lib/defaultLinks';
 import { getDomain } from '@/lib/utils';
+import { openExternal } from '@/lib/openExternal';
 
 interface Props {
   link: DevLink;
@@ -24,7 +25,8 @@ export default function GlassCard({ link, index = 0 }: Props) {
     if (e.shiftKey) {
       openInSplit(link, 1);
     } else {
-      openPreview(link);
+      // Intenta abrir en navegador externo; si falla, preview interno
+      openExternal(link.url).catch(() => openPreview(link));
     }
   };
 
