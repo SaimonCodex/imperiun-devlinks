@@ -54,6 +54,10 @@ interface DevLinksStore {
   visitLink: (id: string) => void;
   togglePin: (id: string) => void;
   reorderLinks: (links: DevLink[]) => void;
+
+  // Import / Export
+  exportLinks: () => void;
+  importLinks: (file: File) => Promise<{ added: number; skipped: number }>;
 }
 
 export const useDevLinksStore = create<DevLinksStore>()(
@@ -118,6 +122,7 @@ export const useDevLinksStore = create<DevLinksStore>()(
           id: generateId(),
           createdAt: Date.now(),
           visitCount: 0,
+          isUserAdded: true,
           favicon: data.favicon || getFaviconUrl(data.url),
         };
         set((s) => ({ links: [...s.links, newLink] }));
@@ -152,6 +157,54 @@ export const useDevLinksStore = create<DevLinksStore>()(
       },
 
       reorderLinks: (links) => set({ links }),
+
+      exportLinks: () => {
+        const userLinks = get().links.filter(l => l.isUserAdded);
+        const json = JSON.stringify({ version: 1, links: userLinks }, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `devlinks-export-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      },
+
+      importLinks: async (file) => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            try {
+              const parsed = JSON.parse(e.target?.result as string);
+              const incoming: DevLink[] = parsed.links ?? parsed;
+              if (!Array.isArray(incoming)) throw new Error('Formato inválido');
+              const existingIds = new Set(get().links.map(l => l.id));
+              const existingUrls = new Set(get().links.map(l => l.url));
+              let added = 0;
+              let skipped = 0;
+              const newLinks: DevLink[] = [];
+              for (const link of incoming) {
+                if (!link.url || !link.title) { skipped++; continue; }
+                if (existingIds.has(link.id) || existingUrls.has(link.url)) { skipped++; continue; }
+                newLinks.push({
+                  ...link,
+                  id: generateId(),
+                  createdAt: Date.now(),
+                  visitCount: 0,
+                  isUserAdded: true,
+                  favicon: link.favicon || getFaviconUrl(link.url),
+                });
+                added++;
+              }
+              set((s) => ({ links: [...s.links, ...newLinks] }));
+              resolve({ added, skipped });
+            } catch (err) {
+              reject(err);
+            }
+          };
+          reader.readAsText(file);
+        });
+      },
     }),
     {
       name: 'devlinks-storage',

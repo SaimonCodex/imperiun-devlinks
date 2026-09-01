@@ -23,6 +23,7 @@ export interface DevLink {
   lastVisited?: number;
   visitCount: number;
   isPinned?: boolean;
+  isUserAdded?: boolean; // true = added manually by the user (not a default)
 }
 
 export interface Category {

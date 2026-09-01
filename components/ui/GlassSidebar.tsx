@@ -5,7 +5,7 @@ import {
   Terminal, Paintbrush, Package, BookOpen,
   Sparkles, Cloud, Database, GraduationCap,
   Zap, Bookmark, Grid3X3, Clock, Pin,
-  PanelLeft,
+  PanelLeft, Star,
 } from 'lucide-react';
 import { CATEGORIES } from '@/lib/defaultLinks';
 import { useDevLinksStore } from '@/lib/store';
@@ -33,9 +33,10 @@ export default function GlassSidebar() {
   const { activeCategory, setActiveCategory, sidebarOpen, toggleSidebar, links } = useDevLinksStore();
 
   const countFor = (id: string) => {
-    if (id === 'all')    return links.length;
-    if (id === 'recent') return links.filter(l => l.lastVisited).length;
-    if (id === 'pinned') return links.filter(l => l.isPinned).length;
+    if (id === 'all')      return links.length;
+    if (id === 'recent')   return links.filter(l => l.lastVisited).length;
+    if (id === 'pinned')   return links.filter(l => l.isPinned).length;
+    if (id === 'my-links') return links.filter(l => l.isUserAdded).length;
     return links.filter(l => l.category === id).length;
   };
 
@@ -136,6 +137,57 @@ export default function GlassSidebar() {
         )}
       </AnimatePresence>
 
+      {/* ── My Links button ── */}
+      {sidebarOpen ? (
+        <button
+          onClick={() => setActiveCategory('my-links')}
+          style={{
+            width: '100%', display: 'flex', alignItems: 'center', gap: 8,
+            padding: '8px 10px', borderRadius: 10, marginBottom: 16, cursor: 'pointer',
+            background: activeCategory === 'my-links' ? 'var(--color-brand-subtle)' : 'var(--c-glass)',
+            border: `1px solid ${activeCategory === 'my-links' ? 'var(--color-brand-10)' : 'var(--c-border)'}`,
+            transition: 'all 140ms ease',
+          }}
+          onMouseEnter={e => { if (activeCategory !== 'my-links') (e.currentTarget as HTMLElement).style.background = 'var(--c-glass-md)'; }}
+          onMouseLeave={e => { if (activeCategory !== 'my-links') (e.currentTarget as HTMLElement).style.background = 'var(--c-glass)'; }}
+        >
+          <Star
+            size={13}
+            strokeWidth={activeCategory === 'my-links' ? 2 : 1.5}
+            style={{ color: activeCategory === 'my-links' ? 'var(--color-brand)' : 'var(--c-text-3)', flexShrink: 0 }}
+          />
+          <span style={{
+            flex: 1, fontSize: 11, fontWeight: activeCategory === 'my-links' ? 600 : 450,
+            color: activeCategory === 'my-links' ? 'var(--color-brand)' : 'var(--c-text-2)',
+            letterSpacing: '-0.01em', textAlign: 'left',
+          }}>
+            Mis Links
+          </span>
+          {countFor('my-links') > 0 && (
+            <span style={{
+              fontSize: 9, fontWeight: 600, color: activeCategory === 'my-links' ? 'var(--color-brand)' : 'var(--c-text-4)',
+              fontVariantNumeric: 'tabular-nums',
+            }}>
+              {countFor('my-links')}
+            </span>
+          )}
+        </button>
+      ) : (
+        <button
+          onClick={() => setActiveCategory('my-links')}
+          title="Mis Links"
+          style={{
+            width: 34, height: 34, borderRadius: 9, marginBottom: 8,
+            background: activeCategory === 'my-links' ? 'var(--color-brand-subtle)' : 'transparent',
+            border: `1px solid ${activeCategory === 'my-links' ? 'var(--color-brand-10)' : 'transparent'}`,
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all 140ms ease',
+          }}
+        >
+          <Star size={13} style={{ color: activeCategory === 'my-links' ? 'var(--color-brand)' : 'var(--c-text-3)' }} strokeWidth={1.75} />
+        </button>
+      )}
+
       {/* Separator */}
       {sidebarOpen && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
@@ -145,6 +197,7 @@ export default function GlassSidebar() {
           <div style={{ flex: 1, height: 1, background: 'var(--c-border)' }} />
         </div>
       )}
+
 
       {/* Category grid */}
       <AnimatePresence>

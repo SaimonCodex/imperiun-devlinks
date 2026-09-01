@@ -8,6 +8,7 @@ import BrowserPanel from '@/components/ui/BrowserPanel';
 import LinkDetailModal from '@/components/ui/LinkDetailModal';
 import LinkGrid from '@/components/dashboard/LinkGrid';
 import RecentLinks from '@/components/dashboard/RecentLinks';
+import MyLinksPanel from '@/components/dashboard/MyLinksPanel';
 import { useDevLinksStore } from '@/lib/store';
 
 export default function DashboardPage() {
@@ -59,8 +60,14 @@ export default function DashboardPage() {
             paddingLeft: 24,
           }}
         >
-          {activeCategory === 'all' && <RecentLinks />}
-          <LinkGrid />
+          {activeCategory === 'my-links' ? (
+            <MyLinksPanel />
+          ) : (
+            <>
+              {activeCategory === 'all' && <RecentLinks />}
+              <LinkGrid />
+            </>
+          )}
         </main>
       </div>
 
